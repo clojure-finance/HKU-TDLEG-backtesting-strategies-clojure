@@ -69,3 +69,38 @@
         (assoc line :date date_ )))
     data))
 
+(defn check-available-date
+  "Check date restriction for selected options."
+  [date exdate]
+  (let [[year1 month1 day1] (map parse-int (str/split date #"-"))
+        [year2 month2 day2] (map parse-int (str/split exdate #"-"))]
+    (and (t/before? (t/plus (t/local-date year1 month1 day1) (t/days 6)) (t/local-date year2 month2 day2)) 
+          (t/after? (t/plus (t/local-date year1 month1 day1) (t/days 15)) (t/local-date year2 month2 day2)))))
+
+
+(defn available-opts
+  "Filter the options according to trading date."
+  [opt-data date]
+  (loop [remaining opt-data
+        result-set []]
+        (if (empty? remaining)
+          (take 5 (sort-by :volume >  result-set))
+          (let [first-line (first remaining)
+                next-remaining (rest remaining)]
+                (if (and (= (get first-line :date) date) 
+                          (check-available-date (get first-line :date) (get first-line :exdate)))
+                    (recur next-remaining (conj result-set {:optionid (parse-int (get first-line :optionid))
+                                                            :volume (parse-int (get first-line :volume))
+                                                            :best_offer (parse-double (get first-line :best_offer))
+                                                            :best_bid (parse-double (get first-line :best_bid))
+                                                            :impl_volatility (parse-double (get first-line :impl_volatility))
+                                                            :delta (parse-double (get first-line :delta))
+                                                            :gamma (parse-double (get first-line :gamma))
+                                                            :vega (parse-double (get first-line :vega))
+                                                            :theta (parse-double (get first-line :theta))}
+                                                            ))
+                    (recur next-remaining result-set))))))
+
+
+
+
