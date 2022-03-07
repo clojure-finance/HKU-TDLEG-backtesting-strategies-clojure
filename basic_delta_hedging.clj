@@ -44,7 +44,7 @@
     (loop [remaining (deref opts)]
       (if-not (empty? remaining)
         (let [first-opt (first remaining) rest-opts (rest remaining)]
-          (order-opts (get-date) first-opt (deref opt-delta))
+          (order-opts (get-date) first-opt (deref opt-BS-delta))
           (recur rest-opts))))
     (loop [remaining (keys (rest (deref portfolio)))]
       (if-not (empty? remaining)
