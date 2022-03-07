@@ -24,13 +24,12 @@
   (reset! data-set (add-aprc (change-format-stock (read-csv-row "./resources/stock2020.csv"))))
 
   (def opts (atom {}))
-  (def vol_K (atom {}))
   (def opt-BS-delta (atom 0.0))
   (init-portfolio "2020-01-02" 154000)
   (order "AAPL" 1000)
   (reset! vol_K (vol_strike (change-format-opts (read-csv-row "./resources/option2020.csv")) (get-date)))
   (reset! opts (add-weight (available-opts (change-format-opts (read-csv-row "./resources/option2020.csv")) (get-date))))
-  (reset! opt-BS-delta (option-BS-delta (deref opts) (adj_term (deref vol_K))))
+  (reset! opt-BS-delta (option-BS-delta (deref opts)))
 
   (doseq [opt (deref opts)]
     (order-opts (get-date) opt (deref opt-delta)))
@@ -40,7 +39,7 @@
   (while (< (compare (get-date) "2020-12-31") 0)
     (reset! vol_K (vol_strike (change-format-opts (read-csv-row "./resources/option2020.csv")) (get-date)))
     (reset! opts (add-weight (available-opts (change-format-opts (read-csv-row "./resources/option2020.csv")) (get-date))))
-    (reset! opt-BS-delta (option-BS-delta (deref opts) (adj_term (deref vol_K))))
+    (reset! opt-BS-delta (option-BS-delta (deref opts)))
     (println (get-date))
     (loop [remaining (deref opts)]
       (if-not (empty? remaining)
